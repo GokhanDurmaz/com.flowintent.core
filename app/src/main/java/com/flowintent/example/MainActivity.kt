@@ -7,7 +7,6 @@ import androidx.lifecycle.lifecycleScope
 import com.flowintent.core.FlowCleanupPolicy
 import com.flowintent.core.FlowIntent
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
     private val viewModel by lazy { (application as MyApplication).viewModel }
