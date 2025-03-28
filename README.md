@@ -26,7 +26,7 @@ Use Case Scenarios
 Scenario: You want to send real-time location updates from one Activity to another (e.g., in a mapping app).  
 
 How It’s Used:
-
+```kotlin
 val flowIntent = FlowIntent(context, MapActivity::class.java, viewModel)
 lifecycleScope.launch {
     while (true) {
@@ -36,23 +36,23 @@ lifecycleScope.launch {
     }
 }
 flowIntent.start()
-
+```
 
 Target MapActivity:
-
+```kotlin
 lifecycleScope.launch {
     viewModel.getFlow(flowId).collect { bundleData ->
         updateMapLocation(bundleData.value as Location)
     }
 }
-
+```
 Benefit: Continuously changing data like location is streamed to the target Activity without requiring additional infrastructure.
 
 2. Dynamic Data Transfer Based on User Input
 Scenario: You want to send user input from a form to another screen in real-time as they fill it out (e.g., a survey app).  
 
 How It’s Used:
-
+```kotlin
 val flowIntent = FlowIntent(context, SummaryActivity::class.java, viewModel)
 editText.addTextChangedListener { text ->
     lifecycleScope.launch {
@@ -60,14 +60,14 @@ editText.addTextChangedListener { text ->
     }
 }
 flowIntent.start()
-
+```
 Benefit: User inputs are instantly streamed to another component, enabling real-time summary updates.
 
 3. Streaming Task Progress and Results
 Scenario: You start a task in one Activity and want to monitor its progress or results in another (e.g., a file upload).  
 
 How It’s Used:
-
+```kotlin
 val flowIntent = FlowIntent(context, UploadActivity::class.java, viewModel)
 flowIntent.start()
 lifecycleScope.launch {
@@ -78,23 +78,23 @@ lifecycleScope.launch {
         }
     }
 }
-
+```
 UploadActivity:
-
+```kotlin
 lifecycleScope.launch {
     uploadFile().collect { progress ->
         flowIntent.emitData("progress", progress)
     }
     flowIntent.emitData("result", "Upload complete!")
 }
-
+```
 Benefit: Replaces static startActivityForResult with a stream of progress and results.
 
 4. Shared Data Flow Across Multiple Components
 Scenario: Multiple Activities or Fragments need to subscribe to the same data stream (e.g., incoming messages in a chat app).  
 
 How It’s Used:
-
+```kotlin
 val flowIntent = FlowIntent(context, ChatActivity::class.java, viewModel)
 lifecycleScope.launch {
     messageStream.collect { message ->
@@ -102,22 +102,22 @@ lifecycleScope.launch {
     }
 }
 flowIntent.start()
-
+```
 Another component:
-
+```kotlin
 lifecycleScope.launch {
     viewModel.getFlow(flowId).collect { bundleData ->
         displayMessage(bundleData.value as String)
     }
 }
-
+```
 Benefit: A centralized stream can be easily shared across components.
 
 5. Monitoring Long-Running Tasks
 Scenario: You want to monitor a background service task (e.g., a download) from an Activity.  
 
 How It’s Used:
-
+```kotlin
 val flowIntent = FlowIntent(context, DownloadActivity::class.java, viewModel)
 downloadService.onProgress = { progress ->
     lifecycleScope.launch {
@@ -125,7 +125,7 @@ downloadService.onProgress = { progress ->
     }
 }
 flowIntent.start()
-
+```
 Benefit: Communication between a Service and UI becomes simple and reactive.
 
 General Benefits and Solution Summary
