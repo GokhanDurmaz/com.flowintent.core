@@ -1,4 +1,4 @@
-package com.flowintent.core
+package com.flowintent.example
 
 import org.junit.Test
 

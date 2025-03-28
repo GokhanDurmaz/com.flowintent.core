@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace = "com.flowintent.core"
+    namespace = "com.flowintent.example"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.flowintent.core"
+        applicationId = "com.flowintent.example"
         minSdk = 21
         targetSdk = 34
         versionCode = 1
@@ -41,6 +41,7 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
+    implementation(project(":flowintent-core"))
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -48,5 +49,6 @@ dependencies {
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.lifecycle.viewmodel.ktx)
     implementation(libs.lifecycle.runtime.ktx)
-    implementation(libs.androidx.activity.ktx) // viewModels() için eklendi
+    implementation(libs.androidx.activity.ktx)
+    implementation(libs.navigation.fragment.ktx)
 }

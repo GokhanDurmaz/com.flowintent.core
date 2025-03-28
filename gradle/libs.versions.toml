@@ -11,7 +11,8 @@ kotlinx-coroutines-android = "1.7.3"
 lifecycle-viewmodel-ktx = "2.7.0"
 lifecycle-runtime-ktx = "2.7.0"
 kotlin-stdlib = "1.9.0"
-activityKtx = "1.8.0" # activity-ktx sürümü
+activityKtx = "1.8.0"
+navigation-fragment-ktx = "2.3.5"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -25,6 +26,7 @@ lifecycle-viewmodel-ktx = { group = "androidx.lifecycle", name = "lifecycle-view
 lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycle-runtime-ktx" }
 kotlin-stdlib = {group = "org.jetbrains.kotlin", name = "kotlin-stdlib", version.ref = "kotlin-stdlib"}
 androidx-activity-ktx = { module = "androidx.activity:activity-ktx", version.ref = "activityKtx" }
+navigation-fragment-ktx = { module = "androidx.navigation:navigation-fragment-ktx", version.ref = "navigation-fragment-ktx" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

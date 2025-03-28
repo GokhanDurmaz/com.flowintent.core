@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <application
+        android:name=".MyApplication"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -12,8 +13,8 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.FlowIntent"
         tools:targetApi="31">
-        <activity android:name=".TargetActivity" />
-        <activity android:name=".MainActivity"
+        <activity android:name="com.flowintent.example.TargetActivity" />
+        <activity android:name="com.flowintent.example.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

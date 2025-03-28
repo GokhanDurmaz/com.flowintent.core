@@ -1,16 +1,15 @@
-package com.flowintent.core
+package com.flowintent.example
 
 import android.os.Bundle
-import android.os.PersistableBundle
 import android.widget.Button
-import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import com.flowintent.core.FlowIntent
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
-    private val viewModel: FlowIntentViewModel by viewModels()
+    private val viewModel by lazy { (application as MyApplication).viewModel }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
