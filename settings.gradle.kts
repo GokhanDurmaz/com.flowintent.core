@@ -16,9 +16,12 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+        flatDir {
+            dirs("${rootDir}/app/libs") // Yerel AAR dosyaları için
+        }
     }
 }
 
 rootProject.name = "FlowIntent"
 include(":app")
- 
+include(":flowintent-core")

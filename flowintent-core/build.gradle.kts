@@ -1,6 +1,6 @@
 plugins {
-    alias(libs.plugins.androidApplication)
-    alias(libs.plugins.jetbrainsKotlinAndroid)
+    alias(libs.plugins.androidLibrary) // Android Library eklentisi
+    alias(libs.plugins.jetbrainsKotlinAndroid) // Kotlin Android eklentisi
 }
 
 android {
@@ -8,13 +8,8 @@ android {
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.flowintent.core"
         minSdk = 21
         targetSdk = 34
-        versionCode = 1
-        versionName = "1.0"
-
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
@@ -33,20 +28,13 @@ android {
     kotlinOptions {
         jvmTarget = "1.8"
     }
-
 }
 
 dependencies {
-    implementation(files("libs/flowintent-core-release.aar"))
-    implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.appcompat)
-    implementation(libs.material)
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
 
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.kotlin.stdlib)
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.lifecycle.viewmodel.ktx)
     implementation(libs.lifecycle.runtime.ktx)
-    implementation(libs.androidx.activity.ktx) // viewModels() için eklendi
 }
