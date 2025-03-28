@@ -22,7 +22,7 @@ Problem: Developers often need to write custom communication layers for dynamic 
 
 Solution: FlowIntent standardizes this process, reducing boilerplate code.
 </details>
-------------- ------------- ------------- ------------- ------------- ------------- 
+
 
 ### Use Case Scenarios
 1. Real-Time Data Updates
