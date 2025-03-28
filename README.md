@@ -1,27 +1,30 @@
 # com.flowintent.core
-FlowIntent: Empower Android Intents with Reactive Flows
+<details open>
+<summary>FlowIntent: Empower Android Intents with Reactive Flows</summary>
 
-1. Limitations of Static Intent Data  
+### 1. Limitations of Static Intent Data  
 Problem: Traditional Intent data transfer is one-time and static. Updating the target component with changing data requires additional mechanisms (e.g., BroadcastReceiver, LiveData).  
 
 Solution: FlowIntent delivers dynamic data flows, allowing the target component to subscribe to real-time updates.
-
-2. Complexity of Asynchronous Data Transfer  
+------------- ------------- ------------- ------------- ------------- ------------- 
+### 2. Complexity of Asynchronous Data Transfer  
 Problem: Sending asynchronous data between Activities or components often requires complex setups (e.g., EventBus, RxJava).  
 
 Solution: FlowIntent simplifies this with Kotlin Flow, seamlessly integrating asynchronous streams.
-
-3. Lifecycle and State Management Challenges  
+------------- ------------- ------------- ------------- ------------- ------------- 
+### 3. Lifecycle and State Management Challenges  
 Problem: When transferring data via Intent, lifecycle mismatches can lead to data loss or synchronization issues.  
 
 Solution: Integrated with ViewModel, FlowIntent provides a lifecycle-aware structure, reducing such risks.
-
-4. Code Repetition and Boilerplate  
+------------- ------------- ------------- ------------- ------------- ------------- 
+### 4. Code Repetition and Boilerplate  
 Problem: Developers often need to write custom communication layers for dynamic data transfer.  
 
 Solution: FlowIntent standardizes this process, reducing boilerplate code.
+</details>
+------------- ------------- ------------- ------------- ------------- ------------- 
 
-Use Case Scenarios
+### Use Case Scenarios
 1. Real-Time Data Updates
 Scenario: You want to send real-time location updates from one Activity to another (e.g., in a mapping app).  
 
@@ -127,8 +130,8 @@ downloadService.onProgress = { progress ->
 flowIntent.start()
 ```
 Benefit: Communication between a Service and UI becomes simple and reactive.
-
-General Benefits and Solution Summary
+------------- ------------- ------------- ------------- ------------- ------------- 
+### General Benefits and Solution Summary
 Flexibility: Transitions from static data transfer to dynamic flows.  
 
 Modernity: Fully aligns with Kotlin Flow and Jetpack ecosystem.  
@@ -136,8 +139,8 @@ Modernity: Fully aligns with Kotlin Flow and Jetpack ecosystem.
 Simplicity: Reduces boilerplate compared to traditional methods.  
 
 Reactivity: Natural solution for real-time data updates.
-
-Potential Application Areas
+------------- ------------- ------------- ------------- ------------- ------------- 
+### Potential Application Areas
 Real-Time Apps: Maps, chat, monitoring tools.  
 
 Form and Data Collection: Surveys, user input tracking.  
