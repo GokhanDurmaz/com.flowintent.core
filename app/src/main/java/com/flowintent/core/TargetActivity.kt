@@ -11,8 +11,8 @@ import kotlinx.coroutines.launch
 class TargetActivity : AppCompatActivity() {
     private val viewModel: FlowIntentViewModel by viewModels()
 
-    override fun onCreate(savedInstanceState: Bundle?, persistentState: PersistableBundle?) {
-        super.onCreate(savedInstanceState, persistentState)
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_target)
 
         val messageText = findViewById<TextView>(R.id.messageText)
