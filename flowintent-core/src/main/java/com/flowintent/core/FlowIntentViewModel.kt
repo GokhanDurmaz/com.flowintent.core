@@ -7,11 +7,18 @@ import java.util.UUID
 
 class FlowIntentViewModel : ViewModel() {
     private val flows = mutableMapOf<String, MutableSharedFlow<BundleData>>()
+    private var currentFlowId: String? = null
 
-    fun createFlow(): Pair<String, MutableSharedFlow<BundleData>> {
+    fun createFlow(cleanupPolicy: FlowCleanupPolicy = FlowCleanupPolicy.CLEANUP_PREVIOUS): Pair<String, MutableSharedFlow<BundleData>> {
+        if (cleanupPolicy == FlowCleanupPolicy.CLEANUP_PREVIOUS) {
+            currentFlowId?.let { flows.remove(it) }
+        }
         val id = UUID.randomUUID().toString()
         val flow = MutableSharedFlow<BundleData>()
         flows[id] = flow
+        if (cleanupPolicy == FlowCleanupPolicy.CLEANUP_PREVIOUS) {
+            currentFlowId = id
+        }
         return id to flow
     }
 
@@ -19,6 +26,7 @@ class FlowIntentViewModel : ViewModel() {
 
     override fun onCleared() {
         flows.clear()
+        currentFlowId = null
         super.onCleared()
     }
 }
