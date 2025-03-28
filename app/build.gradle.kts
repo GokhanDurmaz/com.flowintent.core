@@ -37,7 +37,6 @@ android {
 }
 
 dependencies {
-    implementation(files("libs/flowintent-core-release.aar"))
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
@@ -51,4 +50,5 @@ dependencies {
     implementation(libs.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.ktx)
     implementation(libs.navigation.fragment.ktx)
+    /*implementation(libs.flowintent.core)*/
 }

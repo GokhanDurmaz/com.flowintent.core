@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.androidLibrary) // Android Library eklentisi
     alias(libs.plugins.jetbrainsKotlinAndroid) // Kotlin Android eklentisi
+    id("maven-publish")
 }
 
 android {
@@ -40,4 +41,27 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+}
+
+afterEvaluate {
+    publishing {
+        publications {
+            create<MavenPublication>("release") {
+                from(components["release"])
+                groupId = "com.flowintent" // Grup ID
+                artifactId = "flowintent-core" // Artifact ID
+                version = "1.0.1" // Version
+            }
+        }
+        repositories {
+            maven {
+                name = "GitHubPackages"
+                url = uri("https://maven.pkg.github.com/GokhanDurmaz/com.flowintent.core")
+                credentials {
+                    username = System.getenv("GITHUB_USERNAME") ?: ""
+                    password = System.getenv("GITHUB_TOKEN") ?: ""
+                }
+            }
+        }
+    }
 }

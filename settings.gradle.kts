@@ -17,7 +17,15 @@ dependencyResolutionManagement {
         google()
         mavenCentral()
         flatDir {
-            dirs("${rootDir}/app/libs") // Yerel AAR dosyaları için
+            dirs("${rootDir}/app/libs") // For local AAR files
+        }
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/GokhanDurmaz/com.flowintent.core")
+            credentials {
+                username = System.getenv("GITHUB_USERNAME") ?: ""
+                password = System.getenv("GITHUB_TOKEN") ?: ""
+            }
         }
     }
 }
