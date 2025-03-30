@@ -14,6 +14,7 @@ kotlin-stdlib = "1.9.0"
 activityKtx = "1.8.0"
 navigation-fragment-ktx = "2.3.5"
 flowintent-core = "1.0.1"
+activityKtxVersion = "1.10.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -29,6 +30,7 @@ kotlin-stdlib = {group = "org.jetbrains.kotlin", name = "kotlin-stdlib", version
 androidx-activity-ktx = { module = "androidx.activity:activity-ktx", version.ref = "activityKtx" }
 navigation-fragment-ktx = { module = "androidx.navigation:navigation-fragment-ktx", version.ref = "navigation-fragment-ktx" }
 flowintent-core = { module = "com.flowintent:flowintent-core", version.ref = "flowintent-core"}
+activity-ktx = { group = "androidx.activity", name = "activity-ktx", version.ref = "activityKtxVersion" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

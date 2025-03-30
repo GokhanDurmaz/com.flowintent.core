@@ -2,6 +2,8 @@ package com.flowintent.core
 
 import android.content.Context
 import android.content.Intent
+import com.flowintent.core.model.FlowCleanupPolicy
+import com.flowintent.core.vm.FlowIntentViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow

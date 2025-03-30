@@ -1,4 +1,4 @@
-package com.flowintent.core
+package com.flowintent.core.model
 
 enum class FlowCleanupPolicy {
     CLEANUP_PREVIOUS,

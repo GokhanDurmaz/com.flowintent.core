@@ -1,6 +1,8 @@
-package com.flowintent.core
+package com.flowintent.core.vm
 
 import androidx.lifecycle.ViewModel
+import com.flowintent.core.BundleData
+import com.flowintent.core.model.FlowCleanupPolicy
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import java.util.UUID
