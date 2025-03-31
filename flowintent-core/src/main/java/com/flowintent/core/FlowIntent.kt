@@ -39,7 +39,7 @@ open class FlowIntent(
 
     suspend fun emitData(key: String, value: Any?) {
         dataFlow.emit(BundleData(key, value))
-        Log.d("FlowIntent", "Veri Emit Edildi: $key -> $value, Flow ID: $flowId")
+        Log.d("FlowIntent", "Emitted data: $key -> $value, Flow ID: $flowId")
     }
 
     fun scheduleJob(emitAction: suspend (FlowIntent) -> Unit) {
@@ -59,7 +59,7 @@ open class FlowIntent(
     open fun start() {
         intent.putExtra("flowId", flowId)
         context.startActivity(intent)
-        Log.d("FlowIntent", "Aktivite Başlatıldı, Flow ID: $flowId")
+        Log.d("FlowIntent", "Started activity, Flow ID: $flowId")
     }
 
     fun stop() {
