@@ -9,6 +9,7 @@ import com.flowintent.core.FlowIntent
 import com.flowintent.core.SimpleFlowIntent
 import com.flowintent.core.model.FlowCleanupPolicy
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
     private val viewModel by lazy { (application as MyApplication).viewModel }
@@ -44,7 +45,6 @@ class MainActivity : AppCompatActivity() {
             SimpleFlowIntent.from(this, FlowIntentSimpleTargetActivity::class.java)
                 .withData("initialData", "deneme1")
                 .withDynamicData("stringKey", "denemeDynamic1")
-                .withDynamicData("intKey", 1111)
                 .start()
         }
     }

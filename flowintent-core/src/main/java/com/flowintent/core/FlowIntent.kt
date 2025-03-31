@@ -19,9 +19,9 @@ open class FlowIntent(
     private val cleanupPolicy: FlowCleanupPolicy = FlowCleanupPolicy.CLEANUP_PREVIOUS,
     protected val scope: CoroutineScope
 ) {
-    protected val intent = Intent(context, target)
-    private val flowId: String
-    private val dataFlow: MutableSharedFlow<BundleData>
+    private val intent = Intent(context, target)
+    protected val flowId: String
+    private val dataFlow: MutableSharedFlow<BundleData?>
     private var emitJob: Job? = null
     private val emitJobs = mutableListOf<Job>()
 

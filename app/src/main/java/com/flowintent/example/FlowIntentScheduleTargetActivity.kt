@@ -25,7 +25,7 @@ class FlowIntentScheduleTargetActivity : AppCompatActivity() {
         // Listen the received data and show in the screen
         lifecycleScope.launch {
             flow.collect { bundleData ->
-                if (bundleData.key == "dynamicKey") {
+                if (bundleData?.key == "dynamicKey") {
                     mainDynamicData = bundleData.value.toString()
                     messageText.text = mainDynamicData
                 }

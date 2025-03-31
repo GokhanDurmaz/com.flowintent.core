@@ -1,9 +1,12 @@
 package com.flowintent.example
 
 import android.os.Bundle
+import android.util.Log
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.flowintent.core.SimpleFlowIntent
 import kotlinx.coroutines.launch
 
@@ -18,8 +21,10 @@ class FlowIntentSimpleTargetActivity : AppCompatActivity() {
         lifecycleScope.launch {
             SimpleFlowIntent.current(this@FlowIntentSimpleTargetActivity).getDynamicData()
                 ?.collect { bundleData ->
-                    when(bundleData.key) {
-                        "key1" -> messageText.text = bundleData.value as String
+                    runOnUiThread {
+                        when(bundleData?.key) {
+                            "stringKey" -> messageText.text = bundleData.value.toString()
+                        }
                     }
                 }
         }

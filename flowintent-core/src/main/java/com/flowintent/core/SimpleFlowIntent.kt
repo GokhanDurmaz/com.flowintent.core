@@ -1,5 +1,6 @@
 package com.flowintent.core
 
+import android.app.Activity
 import android.app.Application
 import android.content.Context
 import android.util.Log
@@ -25,10 +26,10 @@ class SimpleFlowIntent(
 
     fun withData(key: String, value: Any?): SimpleFlowIntent {
         putExtra(key, value)
+        Log.d("SimpleFlowIntent", "Statik Veri Eklendi: $key -> $value")
         return this
     }
 
-    // Dinamik veri ekleme
     fun <T> withDynamicData(key: String, value: T): SimpleFlowIntent {
         scope.launch {
             emitData(key, value)
@@ -38,19 +39,20 @@ class SimpleFlowIntent(
 
     override fun start() {
         super.start()
-        Log.d("SimpleFlowIntent", "Aktivite Başlatıldı, Flow ID: ${getFlowId(intent)}")
+        Log.d("SimpleFlowIntent", "Aktivite Başlatıldı, Flow ID: $flowId")
+        instanceMap[flowId] = this // Instance’ı flowId ile kaydet
     }
 
-    // Dinamik verileri alma (FlowIntent’in dataFlow’unu döndürür)
-    fun getDynamicData(): Flow<BundleData>? {
-        val flowId = getFlowId((context as AppCompatActivity).intent)
-        Log.d("SimpleFlowIntent", "Getting Flow ID: $flowId")
-        return flowId?.let { viewModel.getFlow(it) }
+    fun getDynamicData(): Flow<BundleData?>? {
+        val intentFlowId = getFlowId((context as Activity).intent)
+        Log.d("SimpleFlowIntent", "Getting Flow ID from Intent: $intentFlowId, Instance Flow ID: $flowId")
+        // Intent’ten flowId almak yerine instance’ın flowId’sini kullan
+        return viewModel.getFlow(flowId)
     }
 
     inline fun <reified T> getTypedDynamicData(key: String): Flow<T?>? {
         return getDynamicData()?.map { bundleData ->
-            if (bundleData.key == key && bundleData.value is T) {
+            if (bundleData?.key == key && bundleData.value is T) {
                 bundleData.value as T
             } else {
                 null
@@ -58,35 +60,40 @@ class SimpleFlowIntent(
         }
     }
 
-    fun getFlowId(): String? {
-        val flowId = getFlowId((context as AppCompatActivity).intent)
-        if (flowId == null) {
-            Log.w("SimpleFlowIntent", "getFlowId() start() öncesi null dönecek")
-        }
-        return flowId
+    fun fetchFlowId(): String {
+        val intentFlowId = getFlowId((context as Activity).intent)
+        Log.d("SimpleFlowIntent", "Fetching Flow ID - Intent: $intentFlowId, Instance: $flowId")
+        return intentFlowId ?: flowId // Intent’ten yoksa instance’ın flowId’sini döndür
     }
 
     companion object {
+        private val instanceMap = mutableMapOf<String, SimpleFlowIntent>()
+
         fun from(activity: AppCompatActivity, target: Class<*>): SimpleFlowIntent {
             val viewModel = getSharedViewModel(activity)
-            return SimpleFlowIntent(
+            val instance = SimpleFlowIntent(
                 context = activity,
                 target = target,
                 viewModel = viewModel,
                 cleanupPolicy = FlowCleanupPolicy.KEEP_PREVIOUS,
                 scope = activity.lifecycleScope
             )
+            Log.d("SimpleFlowIntent", "SimpleFlowIntent.from() ile oluşturuldu, Target: $target, Flow ID: ${instance.flowId}")
+            return instance
         }
 
-        fun current(activity: AppCompatActivity): SimpleFlowIntent {
-            val viewModel = getSharedViewModel(activity)
-            return SimpleFlowIntent(
-                context = activity,
-                target = AppCompatActivity::class.java,
-                viewModel = viewModel,
-                cleanupPolicy = FlowCleanupPolicy.KEEP_PREVIOUS,
-                scope = activity.lifecycleScope
-            )
+        fun current(activity: Activity): SimpleFlowIntent {
+            val flowId = getFlowId(activity.intent)
+            Log.d("SimpleFlowIntent", "SimpleFlowIntent.current() çağrıldı, Intent’ten Flow ID: $flowId")
+
+            if (flowId != null && instanceMap.containsKey(flowId)) {
+                val instance = instanceMap[flowId]!!
+                Log.d("SimpleFlowIntent", "Mevcut instance döndürüldü, Flow ID: ${instance.flowId}")
+                return instance
+            } else {
+                Log.e("SimpleFlowIntent", "Instance bulunamadı, Flow ID: $flowId. from() ile oluşturulmuş bir instance gerekli.")
+                throw IllegalStateException("No SimpleFlowIntent instance found for flowId: $flowId. Ensure from() was called and start() was executed.")
+            }
         }
 
         private fun getSharedViewModel(context: Context): FlowIntentViewModel {
