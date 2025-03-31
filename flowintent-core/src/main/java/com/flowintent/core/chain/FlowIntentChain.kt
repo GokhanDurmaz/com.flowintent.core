@@ -14,6 +14,10 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 
+/**
+ * A class for chaining activity intents with support for DSL and annotation-based configurations.
+ * Manages the sequence of activity launches and their results using a coroutine-based flow.
+ */
 class FlowIntentChain(
     private val activity: AppCompatActivity,
     private val scope: CoroutineScope
@@ -27,25 +31,44 @@ class FlowIntentChain(
         }
     }
 
-    // Present a step in intent chain
+    /**
+     * Data class representing a single step in the intent chain.
+     * @param intentBuilder Function to build the intent for this step, optionally using the previous result
+     * @param onResult Optional callback to handle the result of this step
+     * @param nextStep The name of the next step (used in annotation-based chaining)
+     */
     data class Step(
         val intentBuilder: (ActivityResult?) -> Intent,
         val onResult: ((ActivityResult) -> Unit)?,
         val nextStep: String = ""
     )
 
-    // For DSL methods
+    // DSL Methods
+
+    /**
+     * Adds a step to start an activity using the provided intent builder (DSL).
+     * @param intentBuilder Function to create the intent for this step
+     */
     fun startActivity(intentBuilder: (ActivityResult?) -> Intent) {
         dslSteps.add(Step(intentBuilder, null))
     }
 
+    /**
+     * Adds a result handler to the last step defined via DSL.
+     * @param onResult Callback to handle the activity result
+     * @throws IllegalStateException if no prior startActivity step exists
+     */
     fun onResult(onResult: (ActivityResult) -> Unit) {
         if (dslSteps.isEmpty()) throw IllegalStateException("Register startActivity first.")
         val lastStep = dslSteps.removeLast()
         dslSteps.add(Step(lastStep.intentBuilder, onResult))
     }
 
-    // Create a flow with DSL
+    /**
+     * Builds and executes a flow of activity results using the DSL-defined steps.
+     * @return A Flow emitting ActivityResult objects as each step completes
+     * @throws IllegalStateException if no DSL steps are defined
+     */
     fun build(): Flow<ActivityResult> {
         if (dslSteps.isEmpty()) throw IllegalStateException("Any DSL Step not specified.")
 
@@ -69,6 +92,11 @@ class FlowIntentChain(
         return resultChannel.receiveAsFlow()
     }
 
+    /**
+     * Builds and executes a flow of activity results using annotation-defined steps.
+     * @return A Flow emitting ActivityResult objects as each step completes
+     * @throws IllegalStateException if the initial step or next steps are not found
+     */
     fun buildFlowFromAnnotations(): Flow<ActivityResult> {
         val methods = activity::class.java.declaredMethods
         var initialStepName: String? = null
@@ -129,7 +157,13 @@ class FlowIntentChain(
     }
 }
 
-// Utility function for DSL
+/**
+ * Utility function to create a DSL-based FlowIntentChain and execute it.
+ * @param activity The hosting activity
+ * @param block DSL block to define the chain steps
+ * @return A Flow emitting ActivityResult objects
+ * @throws IllegalStateException if called after the activity reaches STARTED state
+ */
 fun flowIntentChain(
     activity: AppCompatActivity,
     block: FlowIntentChain.() -> Unit
@@ -142,7 +176,12 @@ fun flowIntentChain(
     return chain.build()
 }
 
-// Utility function for annotation
+/**
+ * Extension function to create an annotation-based FlowIntentChain and execute it.
+ * @receiver The hosting AppCompatActivity
+ * @return A Flow emitting ActivityResult objects
+ * @throws IllegalStateException if called after the activity reaches STARTED state
+ */
 fun AppCompatActivity.flowIntentChainFromAnnotations(): Flow<ActivityResult> {
     if (lifecycle.currentState.isAtLeast(androidx.lifecycle.Lifecycle.State.STARTED)) {
         throw IllegalStateException("flowIntentChainFromAnnotations must be called before the Activity is STARTED")
