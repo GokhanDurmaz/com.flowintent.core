@@ -52,7 +52,7 @@ afterEvaluate {
                 from(components["release"])
                 groupId = "com.flowintent" // Grup ID
                 artifactId = "flowintent-core" // Artifact ID
-                version = "1.0.1" // Version
+                version = "1.0.3" // Version
             }
         }
         repositories {
