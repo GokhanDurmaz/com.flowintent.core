@@ -21,10 +21,8 @@ class FlowIntentSimpleTargetActivity : AppCompatActivity() {
         lifecycleScope.launch {
             SimpleFlowIntent.current(this@FlowIntentSimpleTargetActivity).getDynamicData()
                 ?.collect { bundleData ->
-                    runOnUiThread {
-                        when(bundleData?.key) {
-                            "stringKey" -> messageText.text = bundleData.value.toString()
-                        }
+                    when(bundleData?.key) {
+                        "stringKey" -> messageText.text = bundleData.value.toString()
                     }
                 }
         }
