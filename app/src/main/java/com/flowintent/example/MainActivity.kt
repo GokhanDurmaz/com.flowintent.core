@@ -1,6 +1,7 @@
 package com.flowintent.example
 
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
@@ -40,9 +41,10 @@ class MainActivity : AppCompatActivity() {
 
         val mainStartButton2 = findViewById<Button>(R.id.mainStartButton2)
         mainStartButton2.setOnClickListener {
-            SimpleFlowIntent.to(this, FlowIntentSimpleTargetActivity::class.java)
-                .withDynamicData("string_key","Hello World!")
-                .withDynamicData("int_key",5)
+            SimpleFlowIntent.from(this, FlowIntentSimpleTargetActivity::class.java)
+                .withData("initialData", "deneme1")
+                .withDynamicData("stringKey", "denemeDynamic1")
+                .withDynamicData("intKey", 1111)
                 .start()
         }
     }

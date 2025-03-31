@@ -1,6 +1,5 @@
 package com.flowintent.core
 
-import android.app.Activity
 import android.app.Application
 import android.content.Context
 import android.util.Log
@@ -16,67 +15,78 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
-class SimpleFlowIntent private constructor(
-    private val context: Context,
-    private val target: Class<*>? = null,
-    private val scope: CoroutineScope
-) {
-    internal val flowIntent: FlowIntent
-    private val viewModel: FlowIntentViewModel = getSharedViewModel(context)
-    private val extras = mutableMapOf<String, String>()
+class SimpleFlowIntent(
+    context: Context,
+    target: Class<*>,
+    viewModel: FlowIntentViewModel,
+    cleanupPolicy: FlowCleanupPolicy = FlowCleanupPolicy.CLEANUP_PREVIOUS,
+    scope: CoroutineScope
+) : FlowIntent(context, target, viewModel, cleanupPolicy, scope) {
 
-    init {
-        flowIntent = FlowIntent(
-            context = context,
-            target = target ?: context::class.java, // Null ise mevcut aktiviteyi kullan
-            viewModel = viewModel,
-            cleanupPolicy = FlowCleanupPolicy.KEEP_PREVIOUS,
-            scope = scope
-        )
-    }
-
-    fun withData(key: String, value: String): SimpleFlowIntent {
-        extras[key] = value
-        flowIntent.putExtra(key, value)
+    fun withData(key: String, value: Any?): SimpleFlowIntent {
+        putExtra(key, value)
         return this
     }
 
+    // Dinamik veri ekleme
     fun <T> withDynamicData(key: String, value: T): SimpleFlowIntent {
         scope.launch {
-            flowIntent.emitData(key, value)
+            emitData(key, value)
         }
         return this
     }
 
-    fun start() {
-        flowIntent.start()
+    override fun start() {
+        super.start()
+        Log.d("SimpleFlowIntent", "Aktivite Başlatıldı, Flow ID: ${getFlowId(intent)}")
     }
 
+    // Dinamik verileri alma (FlowIntent’in dataFlow’unu döndürür)
     fun getDynamicData(): Flow<BundleData>? {
-        val flowId = FlowIntent.getFlowId((context as Activity).intent)
+        val flowId = getFlowId((context as AppCompatActivity).intent)
         Log.d("SimpleFlowIntent", "Getting Flow ID: $flowId")
         return flowId?.let { viewModel.getFlow(it) }
     }
 
     inline fun <reified T> getTypedDynamicData(key: String): Flow<T?>? {
-        return getDynamicData()?.let { flow ->
-            flow.map { bundleData ->
-                if (bundleData.key == key && bundleData.value is T) {
-                    bundleData.value as T
-                } else {
-                    null
-                }
+        return getDynamicData()?.map { bundleData ->
+            if (bundleData.key == key && bundleData.value is T) {
+                bundleData.value as T
+            } else {
+                null
             }
         }
     }
 
+    fun getFlowId(): String? {
+        val flowId = getFlowId((context as AppCompatActivity).intent)
+        if (flowId == null) {
+            Log.w("SimpleFlowIntent", "getFlowId() start() öncesi null dönecek")
+        }
+        return flowId
+    }
+
     companion object {
-        fun to(activity: AppCompatActivity, target: Class<*>): SimpleFlowIntent {
-            return SimpleFlowIntent(activity, target, activity.lifecycleScope)
+        fun from(activity: AppCompatActivity, target: Class<*>): SimpleFlowIntent {
+            val viewModel = getSharedViewModel(activity)
+            return SimpleFlowIntent(
+                context = activity,
+                target = target,
+                viewModel = viewModel,
+                cleanupPolicy = FlowCleanupPolicy.KEEP_PREVIOUS,
+                scope = activity.lifecycleScope
+            )
         }
 
         fun current(activity: AppCompatActivity): SimpleFlowIntent {
-            return SimpleFlowIntent(activity, null, activity.lifecycleScope)
+            val viewModel = getSharedViewModel(activity)
+            return SimpleFlowIntent(
+                context = activity,
+                target = AppCompatActivity::class.java,
+                viewModel = viewModel,
+                cleanupPolicy = FlowCleanupPolicy.KEEP_PREVIOUS,
+                scope = activity.lifecycleScope
+            )
         }
 
         private fun getSharedViewModel(context: Context): FlowIntentViewModel {
@@ -84,7 +94,7 @@ class SimpleFlowIntent private constructor(
             return ViewModelProvider(
                 ApplicationViewModelStoreOwner(application),
                 ViewModelProvider.NewInstanceFactory()
-            ).get(FlowIntentViewModel::class.java)
+            )[FlowIntentViewModel::class.java]
         }
     }
 }

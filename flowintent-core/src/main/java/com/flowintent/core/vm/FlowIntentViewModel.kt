@@ -1,5 +1,6 @@
 package com.flowintent.core.vm
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import com.flowintent.core.BundleData
 import com.flowintent.core.model.FlowCleanupPolicy
@@ -18,17 +19,22 @@ class FlowIntentViewModel : ViewModel() {
         val id = UUID.randomUUID().toString()
         val flow = MutableSharedFlow<BundleData>()
         flows[id] = flow
+        Log.d("FlowIntentViewModel", "Flow Created - ID: $id, Flows: ${flows.keys}")
         if (cleanupPolicy == FlowCleanupPolicy.CLEANUP_PREVIOUS) {
             currentFlowId = id
         }
         return id to flow
     }
 
-    fun getFlow(id: String): Flow<BundleData>? = flows[id]
+    fun getFlow(id: String): Flow<BundleData>? {
+        val flow = flows[id]
+        Log.d("FlowIntentViewModel", "Getting Flow - ID: $id, Found: $flow, Flows: ${flows.keys}")
+        return flow
+    }
 
     override fun onCleared() {
         flows.clear()
         currentFlowId = null
-        super.onCleared()
+        Log.d("FlowIntentViewModel", "Flows Cleared")
     }
 }

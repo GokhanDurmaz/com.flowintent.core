@@ -2,6 +2,7 @@ package com.flowintent.core
 
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import com.flowintent.core.model.FlowCleanupPolicy
 import com.flowintent.core.vm.FlowIntentViewModel
 import kotlinx.coroutines.CoroutineScope
@@ -11,14 +12,14 @@ import kotlinx.coroutines.launch
 
 data class BundleData(val key: String, val value: Any?)
 
-class FlowIntent(
-    private val context: Context,
+open class FlowIntent(
+    protected val context: Context,
     private val target: Class<*>,
-    private val viewModel: FlowIntentViewModel,
+    protected val viewModel: FlowIntentViewModel,
     private val cleanupPolicy: FlowCleanupPolicy = FlowCleanupPolicy.CLEANUP_PREVIOUS,
-    private val scope: CoroutineScope
+    protected val scope: CoroutineScope
 ) {
-    private val intent = Intent(context, target)
+    protected val intent = Intent(context, target)
     private val flowId: String
     private val dataFlow: MutableSharedFlow<BundleData>
     private var emitJob: Job? = null
@@ -28,6 +29,7 @@ class FlowIntent(
         val flowPair = viewModel.createFlow(cleanupPolicy)
         flowId = flowPair.first
         dataFlow = flowPair.second
+        Log.d("FlowIntent", "Initialized - Flow ID: $flowId")
     }
 
     fun putExtra(key: String, value: Any?): FlowIntent {
@@ -37,6 +39,7 @@ class FlowIntent(
 
     suspend fun emitData(key: String, value: Any?) {
         dataFlow.emit(BundleData(key, value))
+        Log.d("FlowIntent", "Veri Emit Edildi: $key -> $value, Flow ID: $flowId")
     }
 
     fun scheduleJob(emitAction: suspend (FlowIntent) -> Unit) {
@@ -53,9 +56,10 @@ class FlowIntent(
         }
     }
 
-    fun start() {
+    open fun start() {
         intent.putExtra("flowId", flowId)
         context.startActivity(intent)
+        Log.d("FlowIntent", "Aktivite Başlatıldı, Flow ID: $flowId")
     }
 
     fun stop() {
