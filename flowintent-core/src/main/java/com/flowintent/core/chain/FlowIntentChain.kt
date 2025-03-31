@@ -47,7 +47,7 @@ class FlowIntentChain(
 
     // Create a flow with DSL
     fun build(): Flow<ActivityResult> {
-        if (dslSteps.isEmpty()) throw IllegalStateException("Hiçbir DSL adımı tanımlanmadı")
+        if (dslSteps.isEmpty()) throw IllegalStateException("Any DSL Step not specified.")
 
         var stepIndex = 0
         var previousResult: ActivityResult? = null
@@ -79,7 +79,7 @@ class FlowIntentChain(
                 if (startAnnotation != null) {
                     initialStepName = startAnnotation.stepName // Safe access
                 } else {
-                    throw IllegalStateException("InitialStep ile StartActivity birlikte kullanılmalı")
+                    throw IllegalStateException("Both InitialStep and StartActivity must be used together.")
                 }
             }
 
@@ -105,7 +105,7 @@ class FlowIntentChain(
         }
 
         val initialStep = annotationSteps[initialStepName ?: annotationSteps.keys.first()]
-            ?: throw IllegalStateException("Başlangıç adımı bulunamadı")
+            ?: throw IllegalStateException("Start step not found.")
         launcher.launch(initialStep.intentBuilder(null))
 
         scope.launch {
@@ -118,7 +118,7 @@ class FlowIntentChain(
                     val nextStepName = currentStep.nextStep
                     if (nextStepName.isNotEmpty()) {
                         val nextStep = annotationSteps[nextStepName]
-                            ?: throw IllegalStateException("Sonraki adım '$nextStepName' bulunamadı")
+                            ?: throw IllegalStateException("Next step '$nextStepName' not found.")
                         launcher.launch(nextStep.intentBuilder(result))
                     }
                 }

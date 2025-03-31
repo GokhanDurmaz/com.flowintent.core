@@ -5,15 +5,16 @@
     android:orientation="vertical"
     android:gravity="center">
 
-    <Button
-        android:id="@+id/mainStartButton1"
+    <TextView
+        android:id="@+id/dslText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Schedule Flow Intent" />
+        android:text="Mesaj bekleniyor..." />
 
     <Button
-        android:id="@+id/mainStartButton2"
+        android:id="@+id/dslStartButton1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Simple Flow Intent" />
+        android:text="Start target Activity" />
+
 </LinearLayout>
