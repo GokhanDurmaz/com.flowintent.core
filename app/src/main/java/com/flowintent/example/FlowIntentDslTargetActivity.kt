@@ -14,8 +14,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 
 class FlowIntentDslTargetActivity : AppCompatActivity() {
-    private val viewModel by lazy { (application as MyApplication).viewModel }
-
     private lateinit var dslFlow: Flow<ActivityResult>
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -27,7 +25,9 @@ class FlowIntentDslTargetActivity : AppCompatActivity() {
         val dslStartButton1 = findViewById<Button>(R.id.dslStartButton1)
         dslStartButton1.setOnClickListener {
             dslFlow = flowIntentChain(this) {
-                startActivity { _ -> Intent(Intent.ACTION_PICK).apply { type = "*/*" } }
+                startActivityWithParent(MainActivity::class.java) { _ ->
+                    Intent(Intent.ACTION_PICK).apply { type = "*/*" }
+                }
                 onResult { activityResult ->
                     val uri = activityResult.data?.data ?: Uri.EMPTY
                     if (uri != null && uri != Uri.EMPTY) {
@@ -41,9 +41,9 @@ class FlowIntentDslTargetActivity : AppCompatActivity() {
             lifecycleScope.launch {
                 dslFlow.collect { result ->
                     Log.d("FlowIntentDsl", "DSL result: ${result.resultCode}")
+                    messageText.text = result.data?.dataString
                 }
             }
         }
     }
-
 }

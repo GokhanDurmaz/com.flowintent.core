@@ -2,7 +2,9 @@ package com.flowintent.core
 
 import android.app.Activity
 import android.app.Application
+import android.app.TaskStackBuilder
 import android.content.Context
+import android.content.Intent
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
@@ -27,6 +29,32 @@ class SimpleFlowIntent(
     cleanupPolicy: FlowCleanupPolicy = FlowCleanupPolicy.CLEANUP_PREVIOUS,
     scope: CoroutineScope
 ) : FlowIntent(context, target, viewModel, cleanupPolicy, scope) {
+
+    private var backStackBuilder: TaskStackBuilder? = null
+
+    fun withParent(parent: Class<*>): SimpleFlowIntent {
+        backStackBuilder = TaskStackBuilder.create(context)
+            .addParentStack(parent)
+            .addNextIntent(Intent(context, target))
+        return this
+    }
+
+    override fun startWithBackStack(shouldClearTop: Boolean) {
+        intent.putExtra("flowId", flowId)
+        if (backStackBuilder != null) {
+            val intentCount = backStackBuilder!!.intentCount
+            if (intentCount > 0) {
+                backStackBuilder!!.editIntentAt(intentCount - 1)?.putExtra("flowId", flowId)
+            }
+            backStackBuilder!!.startActivities()
+        } else {
+            if (shouldClearTop) {
+                intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+            }
+            context.startActivity(intent)
+        }
+        instanceMap[flowId] = this
+    }
 
     /**
      * Adds static data to the intent as an extra.

@@ -1,12 +1,9 @@
 package com.flowintent.example
 
 import android.os.Bundle
-import android.util.Log
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import com.flowintent.core.SimpleFlowIntent
 import kotlinx.coroutines.launch
 

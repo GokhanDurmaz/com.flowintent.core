@@ -16,8 +16,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 
 class FlowIntentAnnotationTargetActivity : AppCompatActivity() {
-    private val viewModel by lazy { (application as MyApplication).viewModel }
-
     private lateinit var annotationFlow: Flow<ActivityResult>
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -36,7 +34,7 @@ class FlowIntentAnnotationTargetActivity : AppCompatActivity() {
     }
 
     @InitialStep
-    @StartActivity(stepName = "pick_image", action = Intent.ACTION_PICK)
+    @StartActivity(stepName = "pick_image", action = Intent.ACTION_PICK, parent = "com.flowintent.example.MainActivity")
     fun pickImage(result: ActivityResult?): Intent = Intent(Intent.ACTION_PICK)
 
     @OnResult(stepName = "pick_image", nextStep = "view_image")
@@ -44,7 +42,7 @@ class FlowIntentAnnotationTargetActivity : AppCompatActivity() {
         Log.d("MainActivity", "Result: ${result.data}")
     }
 
-    @StartActivity(stepName = "view_image", action = Intent.ACTION_VIEW)
+    @StartActivity(stepName = "view_image", action = Intent.ACTION_VIEW, parent = "com.flowintent.example.MainActivity")
     @OnResult(stepName = "view_image")
     fun viewImage(result: ActivityResult?): Intent = Intent(Intent.ACTION_VIEW, Uri.parse(result?.data?.getStringExtra("key")))
 }

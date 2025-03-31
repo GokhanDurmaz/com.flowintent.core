@@ -1,5 +1,6 @@
 package com.flowintent.core.chain
 
+import android.app.TaskStackBuilder
 import android.content.Intent
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -40,8 +41,16 @@ class FlowIntentChain(
     data class Step(
         val intentBuilder: (ActivityResult?) -> Intent,
         val onResult: ((ActivityResult) -> Unit)?,
-        val nextStep: String = ""
+        val nextStep: String = "",
+        val parent: Class<*>? = null
     )
+
+    fun startActivityWithParent(
+        parent: Class<*>?,
+        intentBuilder: (ActivityResult?) -> Intent
+    ) {
+        dslSteps.add(Step(intentBuilder, null, parent = parent))
+    }
 
     // DSL Methods
 
@@ -76,7 +85,17 @@ class FlowIntentChain(
         var previousResult: ActivityResult? = null
 
         scope.launch {
-            launcher.launch(dslSteps[0].intentBuilder(null))
+            val firstStep = dslSteps[0]
+            val firstIntent = firstStep.intentBuilder(null)
+            if (firstStep.parent != null) {
+                TaskStackBuilder.create(activity)
+                    .addParentStack(firstStep.parent)
+                    .addNextIntent(firstIntent)
+                    .startActivities()
+            } else {
+                launcher.launch(firstIntent)
+            }
+
             for (result in resultChannel) {
                 val currentStep = dslSteps.getOrNull(stepIndex)
                 currentStep?.onResult?.invoke(result)
@@ -84,7 +103,15 @@ class FlowIntentChain(
                 stepIndex++
                 val nextStep = dslSteps.getOrNull(stepIndex)
                 if (nextStep != null) {
-                    launcher.launch(nextStep.intentBuilder(previousResult))
+                    val nextIntent = nextStep.intentBuilder(previousResult)
+                    if (nextStep.parent != null) {
+                        TaskStackBuilder.create(activity)
+                            .addParentStack(nextStep.parent)
+                            .addNextIntent(nextIntent)
+                            .startActivities()
+                    } else {
+                        launcher.launch(nextIntent)
+                    }
                 }
             }
         }
@@ -105,7 +132,7 @@ class FlowIntentChain(
             if (method.isAnnotationPresent(InitialStep::class.java)) {
                 val startAnnotation = method.getAnnotation(StartActivity::class.java)
                 if (startAnnotation != null) {
-                    initialStepName = startAnnotation.stepName // Safe access
+                    initialStepName = startAnnotation.stepName
                 } else {
                     throw IllegalStateException("Both InitialStep and StartActivity must be used together.")
                 }
@@ -114,6 +141,13 @@ class FlowIntentChain(
             if (method.isAnnotationPresent(StartActivity::class.java)) {
                 val startAnnotation = method.getAnnotation(StartActivity::class.java)
                 val stepName = startAnnotation.stepName
+                val parentClass = if (startAnnotation.parent.isNotEmpty()) {
+                    try {
+                        Class.forName(startAnnotation.parent) as Class<*>
+                    } catch (e: ClassNotFoundException) {
+                        null
+                    }
+                } else null
                 val intentBuilder: (ActivityResult?) -> Intent = { param ->
                     method.invoke(activity, param) as Intent
                 }
@@ -123,18 +157,22 @@ class FlowIntentChain(
                 } else {
                     null
                 }
-                val nextStep: String = if (onResultAnnotation != null) {
-                    onResultAnnotation.nextStep
-                } else {
-                    ""
-                }
-                annotationSteps[stepName] = Step(intentBuilder, onResult, nextStep)
+                val nextStep: String = onResultAnnotation?.nextStep ?: ""
+                annotationSteps[stepName] = Step(intentBuilder, onResult, nextStep, parentClass)
             }
         }
 
         val initialStep = annotationSteps[initialStepName ?: annotationSteps.keys.first()]
             ?: throw IllegalStateException("Start step not found.")
-        launcher.launch(initialStep.intentBuilder(null))
+        val initialIntent = initialStep.intentBuilder(null)
+        if (initialStep.parent != null) {
+            TaskStackBuilder.create(activity)
+                .addParentStack(initialStep.parent)
+                .addNextIntent(initialIntent)
+                .startActivities()
+        } else {
+            launcher.launch(initialIntent)
+        }
 
         scope.launch {
             for (result in resultChannel) {
@@ -147,7 +185,15 @@ class FlowIntentChain(
                     if (nextStepName.isNotEmpty()) {
                         val nextStep = annotationSteps[nextStepName]
                             ?: throw IllegalStateException("Next step '$nextStepName' not found.")
-                        launcher.launch(nextStep.intentBuilder(result))
+                        val nextIntent = nextStep.intentBuilder(result)
+                        if (nextStep.parent != null) {
+                            TaskStackBuilder.create(activity)
+                                .addParentStack(nextStep.parent)
+                                .addNextIntent(nextIntent)
+                                .startActivities()
+                        } else {
+                            launcher.launch(nextIntent)
+                        }
                     }
                 }
             }

@@ -1,7 +1,6 @@
 package com.flowintent.example
 
 import android.os.Bundle
-import android.util.Log
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
@@ -9,7 +8,6 @@ import com.flowintent.core.FlowIntent
 import com.flowintent.core.SimpleFlowIntent
 import com.flowintent.core.model.FlowCleanupPolicy
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
     private val viewModel by lazy { (application as MyApplication).viewModel }
@@ -37,7 +35,7 @@ class MainActivity : AppCompatActivity() {
                 }
             }
 
-            flowIntent.start()
+            flowIntent.startWithBackStack(false)
         }
 
         val mainStartButton2 = findViewById<Button>(R.id.mainStartButton2)
@@ -45,7 +43,8 @@ class MainActivity : AppCompatActivity() {
             SimpleFlowIntent.from(this, FlowIntentSimpleTargetActivity::class.java)
                 .withData("initialData", "deneme1")
                 .withDynamicData("stringKey", "denemeDynamic1")
-                .start()
+                .withParent(MainActivity::class.java)
+                .startWithBackStack(shouldClearTop = false)
         }
     }
 }

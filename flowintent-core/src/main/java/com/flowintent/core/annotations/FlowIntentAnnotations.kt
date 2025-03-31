@@ -17,7 +17,8 @@ annotation class StartActivity(
      * The intent action to be used when building the Intent for this step.
      * This can correspond to standard Android actions (e.g., Intent.ACTION_VIEW) or custom actions.
      */
-    val action: String
+    val action: String,
+    val parent: String
 )
 
 /**

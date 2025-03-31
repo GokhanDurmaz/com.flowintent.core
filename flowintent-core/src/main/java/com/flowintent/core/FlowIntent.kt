@@ -23,12 +23,12 @@ data class BundleData(val key: String, val value: Any?)
  */
 open class FlowIntent(
     protected val context: Context,
-    private val target: Class<*>,
+    protected val target: Class<*>,
     protected val viewModel: FlowIntentViewModel,
     private val cleanupPolicy: FlowCleanupPolicy = FlowCleanupPolicy.CLEANUP_PREVIOUS,
     protected val scope: CoroutineScope
 ) {
-    private val intent = Intent(context, target)
+    protected val intent = Intent(context, target)
     protected val flowId: String
     private val dataFlow: MutableSharedFlow<BundleData?>
     private var emitJob: Job? = null
@@ -63,6 +63,14 @@ open class FlowIntent(
     suspend fun emitData(key: String, value: Any?) {
         dataFlow.emit(BundleData(key, value))
         Log.d("FlowIntent", "Emitted data: $key -> $value, Flow ID: $flowId")
+    }
+
+    open fun startWithBackStack(shouldClearTop: Boolean = false) {
+        intent.putExtra("flowId", flowId)
+        if (shouldClearTop) {
+            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+        }
+        context.startActivity(intent)
     }
 
     /**
