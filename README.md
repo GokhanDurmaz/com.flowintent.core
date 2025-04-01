@@ -1,4 +1,5 @@
-# com.flowintent.core
+# FlowIntent
+![FlowIntent Logo](flowintent-logo.png)
 <details open>
 <summary>FlowIntent: Empower Android Intents with Reactive Flows</summary>
 
