@@ -25,112 +25,332 @@ Solution: FlowIntent standardizes this process, reducing boilerplate code.
 </details>
 
 
-### Use Case Scenarios
-1. Real-Time Data Updates
-Scenario: You want to send real-time location updates from one Activity to another (e.g., in a mapping app).  
+## Use Case Scenarios
+### 1. Scheduling Dynamic Data Updates with FlowIntent
+Description:
+This use-case demonstrates how FlowIntent can schedule a job to emit dynamic data to a target activity over time. It’s ideal for real-time or periodic updates, such as live counters or streaming notifications.
+How It Works:
+* A FlowIntent instance targets an activity and uses a ViewModel to manage state.
 
-How It’s Used:
+* A coroutine job continuously emits data (e.g., an incrementing counter) with a delay.
+
+* The target activity listens to this data flow and updates its UI.
+
+Key Features:
+* Dynamic data emission with emitData.
+
+* Shared state via ViewModel.
+
+* Lifecycle-aware execution.
+
+Code Example:
+
+
 ```kotlin
-val flowIntent = FlowIntent(context, MapActivity::class.java, viewModel)
-lifecycleScope.launch {
-    while (true) {
-        val location = getCurrentLocation() // Fetch location
-        flowIntent.emitData("location", location)
-        delay(1000)
+class SenderActivity : AppCompatActivity() {
+    private val viewModel by lazy { (application as App).sharedViewModel }
+    private var counter = 0
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_sender)
+
+        val flowIntent = FlowIntent(
+            context = this,
+            target = ReceiverActivity::class.java,
+            viewModel = viewModel,
+            cleanupPolicy = FlowCleanupPolicy.CLEANUP_PREVIOUS,
+            scope = lifecycleScope
+        )
+        flowIntent.scheduleJob { intent ->
+            while (true) {
+                intent.emitData("count", "Update #$counter")
+                counter++
+                delay(1000)
+            }
+        }
+        flowIntent.startWithBackStack(false)
     }
 }
-flowIntent.start()
-```
 
-Target MapActivity:
-```kotlin
-lifecycleScope.launch {
-    viewModel.getFlow(flowId).collect { bundleData ->
-        updateMapLocation(bundleData.value as Location)
-    }
-}
-```
-Benefit: Continuously changing data like location is streamed to the target Activity without requiring additional infrastructure.
+class ReceiverActivity : AppCompatActivity() {
+    private val viewModel by lazy { (application as App).sharedViewModel }
 
-2. Dynamic Data Transfer Based on User Input
-Scenario: You want to send user input from a form to another screen in real-time as they fill it out (e.g., a survey app).  
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_receiver)
 
-How It’s Used:
-```kotlin
-val flowIntent = FlowIntent(context, SummaryActivity::class.java, viewModel)
-editText.addTextChangedListener { text ->
-    lifecycleScope.launch {
-        flowIntent.emitData("answer", text.toString())
-    }
-}
-flowIntent.start()
-```
-Benefit: User inputs are instantly streamed to another component, enabling real-time summary updates.
+        val displayText = findViewById<TextView>(R.id.display_text)
+        val flowId = FlowIntent.getFlowId(intent) ?: return
+        val flow = viewModel.getFlow(flowId) ?: return
 
-3. Streaming Task Progress and Results
-Scenario: You start a task in one Activity and want to monitor its progress or results in another (e.g., a file upload).  
-
-How It’s Used:
-```kotlin
-val flowIntent = FlowIntent(context, UploadActivity::class.java, viewModel)
-flowIntent.start()
-lifecycleScope.launch {
-    viewModel.getFlow(flowId).collect { bundleData ->
-        when (bundleData.key) {
-            "progress" -> updateProgressBar(bundleData.value as Int)
-            "result" -> showResult(bundleData.value as String)
+        lifecycleScope.launch {
+            flow.collect { data ->
+                if (data?.key == "count") {
+                    displayText.text = data.value.toString()
+                }
+            }
         }
     }
 }
 ```
-UploadActivity:
-```kotlin
-lifecycleScope.launch {
-    uploadFile().collect { progress ->
-        flowIntent.emitData("progress", progress)
-    }
-    flowIntent.emitData("result", "Upload complete!")
-}
-```
-Benefit: Replaces static startActivityForResult with a stream of progress and results.
 
-4. Shared Data Flow Across Multiple Components
-Scenario: Multiple Activities or Fragments need to subscribe to the same data stream (e.g., incoming messages in a chat app).  
+* Example Scenario:
+A live ticker displaying an updating counter or real-time status messages in an app.
 
-How It’s Used:
-```kotlin
-val flowIntent = FlowIntent(context, ChatActivity::class.java, viewModel)
-lifecycleScope.launch {
-    messageStream.collect { message ->
-        flowIntent.emitData("message", message)
-    }
-}
-flowIntent.start()
-```
-Another component:
-```kotlin
-lifecycleScope.launch {
-    viewModel.getFlow(flowId).collect { bundleData ->
-        displayMessage(bundleData.value as String)
-    }
-}
-```
-Benefit: A centralized stream can be easily shared across components.
+------------- ------------- ------------- ------------- ------------- ------------- 
 
-5. Monitoring Long-Running Tasks
-Scenario: You want to monitor a background service task (e.g., a download) from an Activity.  
+### 2. Simple Intent-Based Navigation with Dynamic Data
+Description:
+This use-case shows how SimpleFlowIntent facilitates navigation with initial and dynamic data passing. It’s a lightweight solution for basic activity transitions.
+How It Works:
+* SimpleFlowIntent launches a target activity with predefined and dynamic data.
 
-How It’s Used:
+* The target activity collects dynamic data updates in a coroutine and reflects them in the UI.
+
+Key Features:
+* Simplified API with withData and withDynamicData.
+
+* Parent stack configuration support.
+
+* Real-time data flow integration.
+
+Code Example:
 ```kotlin
-val flowIntent = FlowIntent(context, DownloadActivity::class.java, viewModel)
-downloadService.onProgress = { progress ->
-    lifecycleScope.launch {
-        flowIntent.emitData("downloadProgress", progress)
+class LauncherActivity : AppCompatActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_launcher)
+
+        SimpleFlowIntent.from(this, DisplayActivity::class.java)
+            .withData("greeting", "Hello!")
+            .withDynamicData("status", "Starting")
+            .withParent(LauncherActivity::class.java)
+            .startWithBackStack(shouldClearTop = false)
     }
 }
-flowIntent.start()
+
+class DisplayActivity : AppCompatActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_display)
+
+        val statusText = findViewById<TextView>(R.id.status_text)
+
+        lifecycleScope.launch {
+            SimpleFlowIntent.current(this@DisplayActivity).getDynamicData()
+                ?.collect { data ->
+                    if (data?.key == "status") {
+                        statusText.text = data.value.toString()
+                    }
+                }
+        }
+    }
+}
 ```
-Benefit: Communication between a Service and UI becomes simple and reactive.
+* Example Scenario:
+Passing a welcome message or status update to a settings screen or dashboard.
+
+------------- ------------- ------------- ------------- ------------- ------------- 
+
+### 3. Deeplink Navigation with JSON Validation
+Description:
+This use-case illustrates how SimpleFlowIntent manages deeplink navigation with JSON parameter validation, suitable for handling structured external links.
+How It Works:
+* A deeplink URI with JSON data is validated against custom rules.
+
+* The target activity extracts and displays the validated data.
+
+* Errors are logged if validation fails.
+
+Key Features:
+* Deeplink support with validation DSL.
+
+* Error handling via onDeepLinkError.
+
+* JSON parsing integration.
+
+Code Example:
+```kotlin
+class EntryActivity : AppCompatActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_entry)
+
+        SimpleFlowIntent.from(this, ProfileActivity::class.java)
+            .withDeeplink(Uri.parse("myapp://profile?data={\"userId\":\"456\",\"role\":\"admin\"}")) {
+                jsonParam("data", isRequired = true) { json ->
+                    json.getString("userId").isNotEmpty() && json.getString("role") in listOf("admin", "user")
+                }
+            }
+            .onDeepLinkError { e -> Log.e("EntryActivity", "Deeplink failed: $e") }
+            .startWithBackStack(shouldClearTop = false)
+    }
+}
+
+class ProfileActivity : AppCompatActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_profile)
+
+        val idText = findViewById<TextView>(R.id.id_text)
+        val roleText = findViewById<TextView>(R.id.role_text)
+
+        val flowIntent = SimpleFlowIntent.current(this)
+        val params = flowIntent.getDeepLinkParams()
+        val jsonData = params.get<JSONObject>("data")
+        idText.text = "User ID: ${jsonData?.getString("userId")}"
+        roleText.text = "Role: ${jsonData?.getString("role")}"
+    }
+}
+```
+
+* Example Scenario:
+Opening a user profile from a notification link with validated user ID and role data.
+
+------------- ------------- ------------- ------------- ------------- ------------- 
+
+### 4. DSL-Based Navigation with Deep Link Validation
+Description:
+This use-case shows how the flowIntentChain DSL creates complex navigation flows with deep link validation and result handling, offering flexibility for custom workflows.
+How It Works:
+* A DSL defines a flow with deep link parameters, a file picker, and a result-based viewer.
+
+* Results are collected and displayed dynamically.
+
+Key Features:
+* Fluent DSL for navigation steps.
+
+* Deep link validation within the flow.
+
+* Coroutine-based result processing.
+
+Code Example:
+```kotlin
+class PickerActivity : AppCompatActivity() {
+    private lateinit var resultFlow: Flow<ActivityResult>
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_picker)
+
+        val resultText = findViewById<TextView>(R.id.result_text)
+        val params = DeepLinkParams().apply {
+            put("fileId", "789")
+            put("action", "view")
+        }
+
+        resultFlow = flowIntentChain(this) {
+            withDeepLink(params) {
+                param("fileId", isRequired = true) { it?.toString()?.isNotEmpty() == true }
+                param("action", isRequired = true) { it == "view" || it == "edit" }
+            }
+            startActivityWithParent(PickerActivity::class.java) { _, _ ->
+                Intent(Intent.ACTION_PICK).apply { type = "*/*" }
+            }
+            onResult { result ->
+                val uri = result.data?.data ?: Uri.EMPTY
+                if (uri != Uri.EMPTY) {
+                    startActivity { _, _ -> Intent(Intent.ACTION_VIEW, uri) }
+                }
+            }
+            onDeepLinkError { e -> Log.e("PickerActivity", "Error: ${e.message}") }
+        }
+
+        lifecycleScope.launch {
+            resultFlow.collect { result ->
+                resultText.text = result.data?.dataString ?: "No file selected"
+            }
+        }
+    }
+}
+```
+
+* Example Scenario:
+A file picker that validates input and views the selected file’s content.
+
+------------- ------------- ------------- ------------- ------------- ------------- 
+
+### 5. Annotation-Based Navigation Flow
+Description:
+This use-case demonstrates how annotations define a navigation flow with deep link support, offering a declarative approach for structured workflows.
+How It Works:
+* Annotations configure a multi-step flow with validated deep link parameters.
+
+* The flow progresses through activities, handling results and errors.
+
+Key Features:
+* Annotation-driven flow definition.
+
+* Custom deep link validation.
+
+* Error handling with annotations.
+
+Code Example:
+```kotlin
+class WorkflowActivity : AppCompatActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_workflow)
+
+        val outputText = findViewById<TextView>(R.id.output_text)
+        val params = DeepLinkParams().apply {
+            put("taskId", "101")
+            put("action", "fetch")
+        }
+
+        val flow = flowIntentChainFromAnnotations {
+            withDeepLink(params) {
+                param("taskId", isRequired = true) { it?.toString()?.isNotEmpty() == true }
+                param("action", isRequired = true) { it == "view" || it == "edit" || it == "fetch" }
+            }
+        }
+
+        lifecycleScope.launch {
+            flow.collect { result ->
+                outputText.text = result.data?.dataString ?: "No result"
+            }
+        }
+    }
+
+    @InitialStep
+    @StartActivity(stepName = "start", parent = "com.example.WorkflowActivity")
+    @DeepLinkParam(name = "taskId", isRequired = true, errorMessage = "Task ID required")
+    @DeepLinkParam(name = "action", isRequired = true, validator = TaskActionValidator::class, errorMessage = "Action must be view, edit, or fetch")
+    fun startStep(result: ActivityResult?, params: DeepLinkParams?): Intent {
+        return Intent(this, DetailActivity::class.java).apply {
+            params?.get<String>("taskId")?.let { putExtra("taskId", it) }
+            params?.get<String>("action")?.let { putExtra("action", it) }
+        }
+    }
+
+    @OnResult(nextStep = "next")
+    fun onStartResult(result: ActivityResult) {
+        Log.d("WorkflowActivity", "Step result: ${result.resultCode}")
+    }
+
+    @StartActivity(stepName = "next")
+    fun nextStep(result: ActivityResult?, params: DeepLinkParams?): Intent {
+        return Intent(this, SummaryActivity::class.java)
+    }
+
+    @OnDeepLinkError
+    fun handleError(error: Throwable) {
+        Log.e("WorkflowActivity", "Error: ${error.message}")
+    }
+}
+
+class TaskActionValidator {
+    fun invoke(value: Any?): Boolean {
+        return value == "view" || value == "edit" || value == "fetch"
+    }
+}
+```
+
+Example Scenario:
+A task management app navigating from a task list to details and summary screens with validated inputs.
+
+
 ------------- ------------- ------------- ------------- ------------- ------------- 
 ### General Benefits and Solution Summary
 Flexibility: Transitions from static data transfer to dynamic flows.  
