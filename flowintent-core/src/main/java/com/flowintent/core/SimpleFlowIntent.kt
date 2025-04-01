@@ -5,12 +5,15 @@ import android.app.Application
 import android.app.TaskStackBuilder
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStore
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.lifecycleScope
+import com.flowintent.core.deeplink.DeepLinkParams
+import com.flowintent.core.deeplink.DeepLinkValidator
 import com.flowintent.core.model.FlowCleanupPolicy
 import com.flowintent.core.vm.FlowIntentViewModel
 import kotlinx.coroutines.CoroutineScope
@@ -31,6 +34,40 @@ class SimpleFlowIntent(
 ) : FlowIntent(context, target, viewModel, cleanupPolicy, scope) {
 
     private var backStackBuilder: TaskStackBuilder? = null
+    private var deepLinkUri: Uri? = null
+    private val deepLinkParams = DeepLinkParams()
+    private var validator: DeepLinkValidator? = null
+    private var onError: ((Throwable) -> Unit)? = null
+    private var fallbackTarget: Class<*>? = null
+
+    fun withDeeplink(uri: Uri, configure: DeepLinkValidator.() -> Unit): SimpleFlowIntent {
+        this.deepLinkUri = uri
+        intent.data = uri
+        intent.action = Intent.ACTION_VIEW
+        parseDeepLinkParams(uri)
+        validator = DeepLinkValidator().apply(configure)
+        return this
+    }
+
+    fun onDeepLinkError(callback: (Throwable) -> Unit): SimpleFlowIntent {
+        this.onError = callback
+        return this
+    }
+
+    fun withFallback(target: Class<*>): SimpleFlowIntent {
+        this.fallbackTarget = target
+        return this
+    }
+
+    private fun parseDeepLinkParams(uri: Uri) {
+        uri.queryParameterNames.forEach { key ->
+            val value = uri.getQueryParameter(key)
+            deepLinkParams.put(key, value)
+        }
+        Log.d("SimpleFlowIntent", "Parsed Deep Link Params: ${deepLinkParams.get<String>("id")}")
+    }
+
+    fun getDeepLinkParams(): DeepLinkParams = deepLinkParams
 
     fun withParent(parent: Class<*>): SimpleFlowIntent {
         backStackBuilder = TaskStackBuilder.create(context)
@@ -40,20 +77,35 @@ class SimpleFlowIntent(
     }
 
     override fun startWithBackStack(shouldClearTop: Boolean) {
-        intent.putExtra("flowId", flowId)
-        if (backStackBuilder != null) {
-            val intentCount = backStackBuilder!!.intentCount
-            if (intentCount > 0) {
-                backStackBuilder!!.editIntentAt(intentCount - 1)?.putExtra("flowId", flowId)
+        try {
+            validator?.let {
+                val validationResult = it.validate(deepLinkParams)
+                if (validationResult.isFailure) {
+                    throw validationResult.exceptionOrNull() ?: IllegalArgumentException("Validation failed.")
+                }
             }
-            backStackBuilder!!.startActivities()
-        } else {
-            if (shouldClearTop) {
-                intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+
+            intent.putExtra("flowId", flowId)
+            if (backStackBuilder != null) {
+                val intentCount = backStackBuilder!!.intentCount
+                if (intentCount > 0) {
+                    backStackBuilder!!.editIntentAt(intentCount - 1)?.putExtra("flowId", flowId)
+                }
+                backStackBuilder!!.startActivities()
+            } else {
+                if (shouldClearTop) {
+                    intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+                }
+                context.startActivity(intent)
             }
-            context.startActivity(intent)
+            instanceMap[flowId] = this
+        } catch (e: Exception) {
+            onError?.invoke(e)
+            fallbackTarget?.let {
+                val fallbackIntent = Intent(context, it).putExtra("flowId", flowId)
+                context.startActivity(fallbackIntent)
+            } ?: Log.e("SimpleFlowIntent", "Deep Link Error: ${e.message}")
         }
-        instanceMap[flowId] = this
     }
 
     /**

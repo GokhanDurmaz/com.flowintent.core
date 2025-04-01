@@ -5,21 +5,16 @@
     android:orientation="vertical"
     android:gravity="center">
 
-    <Button
-        android:id="@+id/mainStartButton1"
+    <TextView
+        android:id="@+id/deeplinkText1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Schedule Flow Intent" />
+        android:text="Mesaj bekleniyor..." />
 
-    <Button
-        android:id="@+id/mainStartButton2"
+    <TextView
+        android:id="@+id/deeplinkText2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Simple Flow Intent" />
+        android:text="Mesaj bekleniyor..." />
 
-    <Button
-        android:id="@+id/mainStartButton3"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Deeplink Flow Intent" />
 </LinearLayout>
