@@ -1,6 +1,8 @@
 package com.flowintent.example
 
+import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
@@ -44,6 +46,18 @@ class MainActivity : AppCompatActivity() {
                 .withData("initialData", "deneme1")
                 .withDynamicData("stringKey", "denemeDynamic1")
                 .withParent(MainActivity::class.java)
+                .startWithBackStack(shouldClearTop = false)
+        }
+
+        val mainStartButton3 = findViewById<Button>(R.id.mainStartButton3)
+        mainStartButton3.setOnClickListener {
+            SimpleFlowIntent.from(this, FlowIntentDeepLinkTargetActivity::class.java)
+                .withDeeplink(Uri.parse("myapp://details?data={\"id\":\"123\",\"type\":\"user\"}")) {
+                    jsonParam("data", isRequired = true) { jsonObject ->
+                        jsonObject.getString("id").isNotEmpty() && jsonObject.getString("type") in listOf("user", "guest")
+                    }
+                }
+                .onDeepLinkError { e -> Log.e("MainActivity", "Validation failed: $e") }
                 .startWithBackStack(shouldClearTop = false)
         }
     }
