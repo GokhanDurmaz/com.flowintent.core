@@ -22,6 +22,7 @@ Solution: Integrated with ViewModel, FlowIntent provides a lifecycle-aware struc
 Problem: Developers often need to write custom communication layers for dynamic data transfer.  
 
 Solution: FlowIntent standardizes this process, reducing boilerplate code.
+------------- ------------- ------------- ------------- ------------- ------------- 
 </details>
 
 
