@@ -1,5 +1,7 @@
 package com.flowintent.core.annotations
 
+import kotlin.reflect.KClass
+
 /**
  * Annotation to mark a function as a step in the FlowIntentChain that starts an activity.
  * The function must return an Intent, which will be used to launch the activity.
@@ -17,8 +19,8 @@ annotation class StartActivity(
      * The intent action to be used when building the Intent for this step.
      * This can correspond to standard Android actions (e.g., Intent.ACTION_VIEW) or custom actions.
      */
-    val action: String,
-    val parent: String
+    val action: String = "",
+    val parent: String = ""
 )
 
 /**
@@ -49,6 +51,20 @@ annotation class OnResult(
 @Target(AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.RUNTIME)
 annotation class InitialStep
+
+@Target(AnnotationTarget.FUNCTION)
+@Retention(AnnotationRetention.RUNTIME)
+@Repeatable
+annotation class DeepLinkParam(
+    val name: String,
+    val isRequired: Boolean = false,
+    val validator: KClass<*> = Any::class,
+    val errorMessage: String = ""
+)
+
+@Target(AnnotationTarget.FUNCTION)
+@Retention(AnnotationRetention.RUNTIME)
+annotation class OnDeepLinkError
 
 
 
