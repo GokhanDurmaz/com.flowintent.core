@@ -6,6 +6,180 @@
   {% seo %}
 </head>
 <body>
-  {{ content }}
+    <div class="container-lg px-3 my-5 markdown-body">
+      
+      <h1><a href="https://gokhandurmaz.github.io/com.flowintent.core/">com.flowintent.core</a></h1>
+      
+
+      <h1 id="flowintentcore---android-navigation-library">FlowIntent.Core - Android Navigation Library</h1>
+
+<p><strong>FlowIntent.Core</strong> is a versatile navigation library for Android, designed to simplify and enhance navigation in your applications. Built with Kotlin, it offers robust support for <strong>legacy Activity-based projects</strong>, seamless integration with <strong>Kotlin Coroutines</strong> for dynamic data flows, and the newly added <strong>Advanced Deeplink</strong> feature for deep linking flexibility. Whether you’re maintaining an older app or building a modern one, FlowIntent.Core has you covered.</p>
+
+<hr>
+
+<h2 id="features">Features<a class="anchorjs-link " href="#features" aria-label="Anchor" data-anchorjs-icon="" style="font: 1em / 1 anchorjs-icons; padding-left: 0.375em;"></a></h2>
+
+<h3 id="legacy-navigation-support">Legacy Navigation Support<a class="anchorjs-link " href="#legacy-navigation-support" aria-label="Anchor" data-anchorjs-icon="" style="font: 1em / 1 anchorjs-icons; padding-left: 0.375em;"></a></h3>
+<p>FlowIntent.Core provides full compatibility with traditional Android navigation using Activities and Intents. Easily manage navigation flows in legacy projects with a clean and intuitive API.</p>
+
+<ul>
+  <li><strong>Activity-Based Navigation:</strong> Start Activities with customizable backstack behavior.</li>
+  <li><strong>Intent Management:</strong> Simplified Intent creation and execution.</li>
+</ul>
+
+<h3 id="kotlin-coroutines-integration">Kotlin Coroutines Integration<a class="anchorjs-link " href="#kotlin-coroutines-integration" aria-label="Anchor" data-anchorjs-icon="" style="font: 1em / 1 anchorjs-icons; padding-left: 0.375em;"></a></h3>
+<p>Leverage the power of Kotlin Coroutines to handle dynamic data flows within your navigation logic.</p>
+
+<ul>
+  <li><strong>Asynchronous Data Emission:</strong> Emit and collect data seamlessly during navigation.</li>
+  <li><strong>Lifecycle-Aware:</strong> Integrate with <code class="language-plaintext highlighter-rouge">lifecycleScope</code> for safe coroutine execution.</li>
+</ul>
+
+<h3 id="advanced-deeplink-support-new-in-v110">Advanced Deeplink Support (New in v1.1.0)<a class="anchorjs-link " href="#advanced-deeplink-support-new-in-v110" aria-label="Anchor" data-anchorjs-icon="" style="font: 1em / 1 anchorjs-icons; padding-left: 0.375em;"></a></h3>
+<p>Take control of deep linking with advanced features, allowing complex routing and parameter validation.</p>
+
+<ul>
+  <li><strong>Custom Deeplink Handling:</strong> Parse and validate deep link parameters effortlessly.</li>
+  <li><strong>Flexible Routing:</strong> Direct users to specific screens based on deeplink data.</li>
+</ul>
+
+<hr>
+
+<h2 id="installation">Installation<a class="anchorjs-link " href="#installation" aria-label="Anchor" data-anchorjs-icon="" style="font: 1em / 1 anchorjs-icons; padding-left: 0.375em;"></a></h2>
+
+<p>FlowIntent.Core is available on <strong>Maven Central</strong>, making it easy to integrate without any authentication tokens.</p>
+
+<p>Add the dependency to your <code class="language-plaintext highlighter-rouge">build.gradle</code>:</p>
+
+<div class="language-gradle highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">repositories</span> <span class="o">{</span>
+    <span class="n">mavenCentral</span><span class="o">()</span>
+<span class="o">}</span>
+
+<span class="k">dependencies</span> <span class="o">{</span>
+    <span class="n">implementation</span> <span class="s1">'com.flowintent:flowintent-core:1.1.0'</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h1 id="usage-examples">Usage Examples</h1>
+<p>Basic Navigation (Legacy)
+Start an Activity with a simple navigation flow:</p>
+<div class="language-kotlin highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">val</span> <span class="py">flowIntent</span> <span class="p">=</span> <span class="nc">FlowIntent</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="nc">TargetActivity</span><span class="o">::</span><span class="k">class</span><span class="p">.</span><span class="n">java</span><span class="p">,</span> <span class="n">lifecycleScope</span><span class="p">)</span>
+<span class="n">flowIntent</span><span class="p">.</span><span class="nf">scheduleJob</span> <span class="p">{</span> <span class="n">intent</span> <span class="p">-&gt;</span>
+    <span class="n">intent</span><span class="p">.</span><span class="nf">emitData</span><span class="p">(</span><span class="s">"key"</span><span class="p">,</span> <span class="s">"Welcome to FlowIntent.Core"</span><span class="p">)</span>
+<span class="p">}</span>
+<span class="n">flowIntent</span><span class="p">.</span><span class="nf">startWithBackStack</span><span class="p">(</span><span class="n">clearTop</span> <span class="p">=</span> <span class="k">false</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>Dynamic Data with Coroutines
+Emit and handle dynamic data during navigation:</p>
+<div class="language-kotlin highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">val</span> <span class="py">flowIntent</span> <span class="p">=</span> <span class="nc">FlowIntent</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="nc">TargetActivity</span><span class="o">::</span><span class="k">class</span><span class="p">.</span><span class="n">java</span><span class="p">,</span> <span class="n">lifecycleScope</span><span class="p">)</span>
+<span class="n">flowIntent</span><span class="p">.</span><span class="nf">scheduleJob</span> <span class="p">{</span> <span class="n">intent</span> <span class="p">-&gt;</span>
+    <span class="kd">var</span> <span class="py">count</span> <span class="p">=</span> <span class="mi">0</span>
+    <span class="k">while</span> <span class="p">(</span><span class="k">true</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">intent</span><span class="p">.</span><span class="nf">emitData</span><span class="p">(</span><span class="s">"counter"</span><span class="p">,</span> <span class="s">"Count: $count"</span><span class="p">)</span>
+        <span class="n">count</span><span class="p">++</span>
+        <span class="nf">delay</span><span class="p">(</span><span class="mi">1000</span><span class="p">)</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+<span class="n">flowIntent</span><span class="p">.</span><span class="nf">startWithBackStack</span><span class="p">()</span>
+</code></pre></div></div>
+
+<p>Advanced Deeplink
+Handle deep links with custom validation:</p>
+<div class="language-kotlin highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">val</span> <span class="py">flowIntent</span> <span class="p">=</span> <span class="nc">FlowIntent</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="nc">TargetActivity</span><span class="o">::</span><span class="k">class</span><span class="p">.</span><span class="n">java</span><span class="p">,</span> <span class="n">lifecycleScope</span><span class="p">)</span>
+<span class="n">flowIntent</span><span class="p">.</span><span class="nf">navigateToDeeplink</span><span class="p">(</span><span class="s">"myapp://details?id=123&amp;action=view"</span><span class="p">)</span> <span class="p">{</span> <span class="n">params</span> <span class="p">-&gt;</span>
+    <span class="kd">val</span> <span class="py">id</span> <span class="p">=</span> <span class="n">params</span><span class="p">.</span><span class="nf">getString</span><span class="p">(</span><span class="s">"id"</span><span class="p">)</span>
+    <span class="kd">val</span> <span class="py">action</span> <span class="p">=</span> <span class="n">params</span><span class="p">.</span><span class="nf">getString</span><span class="p">(</span><span class="s">"action"</span><span class="p">)</span>
+    <span class="n">id</span><span class="o">?.</span><span class="nf">isNotEmpty</span><span class="p">()</span> <span class="p">==</span> <span class="k">true</span> <span class="p">&amp;&amp;</span> <span class="n">action</span> <span class="p">==</span> <span class="s">"view"</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h2 id="why-flowintentcore">Why FlowIntent.Core?<a class="anchorjs-link " href="#why-flowintentcore" aria-label="Anchor" data-anchorjs-icon="" style="font: 1em / 1 anchorjs-icons; padding-left: 0.375em;"></a></h2>
+<ul>
+  <li>
+    <p>Versatile: Supports legacy Android projects with a modern Kotlin-first approach.</p>
+  </li>
+  <li>
+    <p>Powerful Deeplinking: Advanced deeplink features for complex navigation needs.</p>
+  </li>
+  <li>
+    <p>Lightweight: Minimal dependencies, optimized for performance.</p>
+  </li>
+  <li>
+    <p>Open Source: Free to use and contribute under the Apache 2.0 License.</p>
+  </li>
+</ul>
+
+<h2 id="getting-started">Getting Started<a class="anchorjs-link " href="#getting-started" aria-label="Anchor" data-anchorjs-icon="" style="font: 1em / 1 anchorjs-icons; padding-left: 0.375em;"></a></h2>
+<ul>
+  <li>
+    <p>Add the Dependency: Include FlowIntent.Core in your build.gradle as shown above.</p>
+  </li>
+  <li>
+    <p>Explore the API: Start with basic navigation or dive into advanced deeplink features.</p>
+  </li>
+  <li>
+    <p>Check the Docs: See below for more resources.</p>
+  </li>
+</ul>
+
+<h2 id="roadmap">Roadmap<a class="anchorjs-link " href="#roadmap" aria-label="Anchor" data-anchorjs-icon="" style="font: 1em / 1 anchorjs-icons; padding-left: 0.375em;"></a></h2>
+<p>FlowIntent.Core is actively evolving! Upcoming features include:</p>
+<ul>
+  <li>
+    <p>Gradle DSL Support: Customize library features with a flowIntent {} block.</p>
+  </li>
+  <li>
+    <p>Jetpack Compose Integration: Full navigation support for Compose-based apps.</p>
+  </li>
+  <li>
+    <p>Stay tuned by watching the repository or checking the releases.</p>
+  </li>
+</ul>
+
+<h2 id="contributing">Contributing<a class="anchorjs-link " href="#contributing" aria-label="Anchor" data-anchorjs-icon="" style="font: 1em / 1 anchorjs-icons; padding-left: 0.375em;"></a></h2>
+<p>FlowIntent.Core is an open-source project, and we welcome contributions from the community!</p>
+<ul>
+  <li>
+    <p>Repository: github.com/GokhanDurmaz/FlowIntent.Core</p>
+  </li>
+  <li>
+    <p>Issues: Report bugs or suggest features here.</p>
+  </li>
+  <li>
+    <p>Pull Requests: Submit your improvements here.</p>
+  </li>
+</ul>
+
+<h2 id="resources">Resources<a class="anchorjs-link " href="#resources" aria-label="Anchor" data-anchorjs-icon="" style="font: 1em / 1 anchorjs-icons; padding-left: 0.375em;"></a></h2>
+<ul>
+  <li>
+    <p>Latest Release: v1.1.0</p>
+  </li>
+  <li>
+    <p>Changelog: CHANGELOG.md</p>
+  </li>
+  <li>
+    <p>License: Apache 2.0</p>
+  </li>
+  <li>
+    <p>Contact: Gokhan Durmaz <a href="mailto:gdurmaz1234@gmail.com">gdurmaz1234@gmail.com</a></p>
+  </li>
+</ul>
+
+<p>Last Updated: April 2025</p>
+
+
+
+      
+      <div class="footer border-top border-gray-light mt-5 pt-3 text-right text-gray">
+        This site is open source. <a href="https://github.com/GokhanDurmaz/com.flowintent.core/edit/main/docs/index.md">Improve this page</a>.
+      </div>
+      
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/anchor-js/4.1.0/anchor.min.js" integrity="sha256-lZaRhKri35AyJSypXXs4o6OPFTbTmUoltBbDCbdzegg=" crossorigin="anonymous"></script>
+    <script>anchors.add();</script>
+  
+
 </body>
 </html>
