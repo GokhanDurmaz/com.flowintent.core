@@ -1,3 +1,6 @@
+<meta name="google-site-verification" content="DJ4lgfquekByEbfgY8KWGLT0DDpysxrCQtQROrZZBCc" />
+
+
 # FlowIntent.Core - Android Navigation Library
 
 **FlowIntent.Core** is a versatile navigation library for Android, designed to simplify and enhance navigation in your applications. Built with Kotlin, it offers robust support for **legacy Activity-based projects**, seamless integration with **Kotlin Coroutines** for dynamic data flows, and the newly added **Advanced Deeplink** feature for deep linking flexibility. Whether you're maintaining an older app or building a modern one, FlowIntent.Core has you covered.
