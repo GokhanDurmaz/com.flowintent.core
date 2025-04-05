@@ -89,7 +89,7 @@ flowIntent.navigateToDeeplink("myapp://details?id=123&action=view") { params ->
 
  * Lightweight: Minimal dependencies, optimized for performance.
 
- * Open Source: Free to use and contribute under the Apache 2.0 License.
+ * Open Source: Free to use and contribute under the MIT License.
 
 ## Getting Started
  * Add the Dependency: Include FlowIntent.Core in your build.gradle as shown above.
@@ -118,9 +118,9 @@ FlowIntent.Core is an open-source project, and we welcome contributions from the
 ## Resources
  * Latest Release: v1.1.0
 
- * Changelog: CHANGELOG.md
+ * Changelog: [CHANGELOG.md](https://github.com/GokhanDurmaz/com.flowintent.core/blob/main/docs/CHANGELOG.md)
 
- * License: Apache 2.0
+ * License: MIT license
 
  * Contact: Gokhan Durmaz [gdurmaz1234@gmail.com](mailto:gdurmaz1234@gmail.com)
 
