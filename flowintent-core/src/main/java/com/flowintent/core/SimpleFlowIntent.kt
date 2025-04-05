@@ -40,6 +40,13 @@ class SimpleFlowIntent(
     private var onError: ((Throwable) -> Unit)? = null
     private var fallbackTarget: Class<*>? = null
 
+    /**
+     * Configures the intent with a deep link URI and a validation logic block.
+     *
+     * @param uri The deep link URI to navigate to (e.g., "myapp://details?id=123").
+     * @param configure A lambda block to configure the [DeepLinkValidator] for parameter validation.
+     * @return This instance for method chaining.
+     */
     fun withDeeplink(uri: Uri, configure: DeepLinkValidator.() -> Unit): SimpleFlowIntent {
         this.deepLinkUri = uri
         intent.data = uri
@@ -49,11 +56,23 @@ class SimpleFlowIntent(
         return this
     }
 
+    /**
+     * Sets an error callback to handle exceptions during deep link processing.
+     *
+     * @param callback A lambda to handle errors thrown during deep link validation or navigation.
+     * @return This instance for method chaining.
+     */
     fun onDeepLinkError(callback: (Throwable) -> Unit): SimpleFlowIntent {
         this.onError = callback
         return this
     }
 
+    /**
+     * Specifies a fallback activity to launch if deep link processing fails.
+     *
+     * @param target The class of the fallback activity.
+     * @return This instance for method chaining.
+     */
     fun withFallback(target: Class<*>): SimpleFlowIntent {
         this.fallbackTarget = target
         return this
@@ -67,8 +86,19 @@ class SimpleFlowIntent(
         Log.d("SimpleFlowIntent", "Parsed Deep Link Params: ${deepLinkParams.get<String>("id")}")
     }
 
+    /**
+     * Retrieves the parsed deep link parameters.
+     *
+     * @return The [DeepLinkParams] instance containing the parsed query parameters.
+     */
     fun getDeepLinkParams(): DeepLinkParams = deepLinkParams
 
+    /**
+     * Configures the back stack with a parent activity.
+     *
+     * @param parent The class of the parent activity to add to the back stack.
+     * @return This instance for method chaining.
+     */
     fun withParent(parent: Class<*>): SimpleFlowIntent {
         backStackBuilder = TaskStackBuilder.create(context)
             .addParentStack(parent)
@@ -76,6 +106,12 @@ class SimpleFlowIntent(
         return this
     }
 
+    /**
+     * Starts the target activity with back stack support, applying deep link validation if configured.
+     *
+     * @param shouldClearTop If true, clears the top activity in the stack before starting.
+     * @throws Exception If deep link validation fails and no fallback is provided.
+     */
     override fun startWithBackStack(shouldClearTop: Boolean) {
         try {
             validator?.let {
